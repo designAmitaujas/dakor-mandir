@@ -71,9 +71,7 @@ export const CustomInput: React.FC<ICustomInput> = memo((props) => {
 
   return (
     <FormControl isRequired={isRequired} isInvalid={isInvalid}>
-      {label && (
-        <FormControl.Label fontWeight={"bold"}>{label}</FormControl.Label>
-      )}
+      {label && <FormControl.Label>{label}</FormControl.Label>}
       <Input
         {...props}
         keyboardType={keyboardType}
@@ -204,9 +202,15 @@ export const CustomButton: React.FC<ICustomButton> = memo((props) => {
     <Button
       {...props}
       onPress={onSubmit}
-      leftIcon={isSubmitting === true ? <Spinner /> : props.leftIcon || null}
+      leftIcon={
+        isSubmitting === true ? (
+          <Spinner color={"black"} />
+        ) : (
+          props.leftIcon || null
+        )
+      }
     >
-      {capitalize(name)}
+      <Text>{capitalize(name)}</Text>
     </Button>
   );
 }, isEqual);

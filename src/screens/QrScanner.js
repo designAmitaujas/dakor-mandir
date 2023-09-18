@@ -58,28 +58,17 @@ export default function QRScanner({ navigation }) {
   if (!scanned) {
     return (
       <>
-        <View
-          flex={1}
-          justifyContent={"center"}
-          alignItems={"center"}
-          bg={"gray.900"}
-        >
+        <View flex={1} justifyContent={"center"} alignItems={"center"}>
           <Box alignItems={"center"} justifyContent={"center"}>
-            <Text fontSize={"4xl"} color={"white"} fontWeight={"semibold"}>
-              Scanned QR
+            <Text fontSize={"2xl"} color={"white"} fontWeight={"semibold"}>
+              Place the QR code inside the area
             </Text>
-            <Text fontSize={"4xl"} color={"white"} fontWeight={"semibold"}>
-              For Attendance
+            <Text fontSize={"xl"} color={"white"} fontWeight={"semibold"}>
+              Scanning will start automatically
             </Text>
           </Box>
 
-          <BarCodeScanner
-            style={{
-              width: "60%",
-              height: "60%",
-            }}
-            onBarCodeScanned={handleBarCodeScanned}
-          />
+          <BarCodeScanner onBarCodeScanned={handleBarCodeScanned} />
         </View>
       </>
     );

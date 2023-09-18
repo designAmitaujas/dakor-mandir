@@ -31,23 +31,16 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().min(6).max(18).required(),
 });
 
-const Login = () => {
+const ForgotPassword = () => {
   const { navigate } = useNavigation();
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
 
-  const handleSubmit = () => {
-    // @ts-ignore
-    navigate(Home);
-  };
-  const handleLogin = () => {
-    // @ts-ignore
-    navigate(Home);
-  };
+  const handleSubmit = () => {};
 
-  const Forgot = () => {
+  const backtologin = () => {
     //@ts-ignore
-    navigate("ForgotPassword");
+    navigate("Login");
   };
 
   return (
@@ -102,7 +95,7 @@ const Login = () => {
                     fontWeight={"semibold"}
                     alignSelf={"center"}
                   >
-                    Login
+                    Forgot Password
                   </Text>
 
                   <VStack space={2} alignSelf={"center"} mt={"5"}>
@@ -129,91 +122,14 @@ const Login = () => {
                       }
                       bgColor="white"
                     />
-                    <CustomInput
-                      // secureTextEntry={true}
-                      isRequired={true}
-                      borderColor={"#000"}
-                      w={"72"}
-                      name="password"
-                      label="Password"
-                      currentValue={values.password}
-                      errMsg={errors.password}
-                      placeholder="Your password"
-                      setFieldValue={setFieldValue}
-                      bgColor="white"
-                      isInvalid={!!touched.password && !!errors.password}
-                      type={show ? "text" : "password"}
-                      leftElement={
-                        <Icon
-                          as={Ionicons}
-                          name="key-outline"
-                          size={5}
-                          ml="3"
-                          color="#000"
-                        />
-                      }
-                      rightElement={
-                        <IconButton
-                          mr={0.5}
-                          borderRadius={10}
-                          onPress={handleClick}
-                          icon={
-                            show ? (
-                              <Icon
-                                as={Ionicons}
-                                name="eye"
-                                size={5}
-                                color="#000"
-                              />
-                            ) : (
-                              <Icon
-                                as={Ionicons}
-                                name="eye-off"
-                                size={5}
-                                color="#000"
-                              />
-                            )
-                          }
-                        />
-                      }
-                    />
-
-                    <Link
-                      alignSelf={"flex-end"}
-                      onPress={Forgot}
-                      _text={{
-                        fontWeight: "medium",
-                        fontSize: "md",
-                        textDecoration: "none",
-                      }}
-                    >
-                      Forgot Password ?
-                    </Link>
-
-                    {/* <Button
-                        mt="6"
-                        borderRadius={25}
-                        w={"48"}
-                        h={12}
-                        alignSelf={"center"}
-                        bgColor={"#313031"}
-                        shadow={"2"}
-                        //@ts-ignore
-                        onPress={handleSubmit}
-                        leftIcon={isSubmitting === true ? <Spinner /> : null}
-                        isSubmitting={isSubmitting}
-                      >
-                        Log In
-                      </Button> */}
 
                     <CustomButton
-                      name="Login"
-                      mt="5"
-                      mb={5}
+                      name="Submit"
+                      mt="8"
+                      mb={3}
                       borderRadius={25}
                       w={"48"}
                       h={12}
-                      onPress={handleLogin}
                       alignSelf={"center"}
                       bg={"#ffda67"}
                       shadow={3}
@@ -229,6 +145,22 @@ const Login = () => {
                       isSubmitting={isSubmitting}
                       onSubmit={handleSubmit}
                     />
+                    <Link
+                      alignSelf={"center"}
+                      onPress={backtologin}
+                      _text={{
+                        textDecoration: "none",
+                      }}
+                    >
+                      <HStack alignItems={"center"} space={1}>
+                        <Text fontSize={"xl"} fontWeight={"bold"} mb={1}>
+                          →
+                        </Text>
+                        <Text fontWeight={"semibold"} fontSize={"md"}>
+                          Back to login
+                        </Text>
+                      </HStack>
+                    </Link>
                   </VStack>
                 </ScrollView>
               </>
@@ -240,4 +172,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

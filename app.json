@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "WIRC-User",
-    "slug": "WIRC-User",
+    "name": "Dakor-Mandir",
+    "slug": "Dakor-Mandir",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/wirclogo.jpg",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-logo.png",
+      "image": "./assets/logo2.png",
       "resizeMode": "conatin",
-      "backgroundColor": "#fff"
+      "backgroundColor": "#ffda67"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -17,12 +17,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/wirclogo.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/wirclogo.png"
+      "favicon": "./assets/logo.png"
     }
   }
 }

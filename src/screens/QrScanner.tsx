@@ -4,8 +4,9 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import { Box } from "native-base";
 import { StyleSheet } from "react-native";
 import Lottie from "lottie-react-native";
-import Qrcodes from "./profile/Qrcode";
+
 import { useIsFocused } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons";
 
 const QRScanner = () => {
   const isFocused = useIsFocused();
@@ -69,20 +70,17 @@ function QRScreen() {
           flex={1}
           justifyContent={"center"}
           alignItems={"center"}
-          bg={"gray.900"}
+          bg={"#ffda67"}
         >
           <Box alignItems={"center"} justifyContent={"center"}>
-            <Text fontSize={"4xl"} color={"white"} fontWeight={"semibold"}>
-              Scanned QR
-            </Text>
-            <Text fontSize={"4xl"} color={"white"} fontWeight={"semibold"}>
-              For Attendance
+            <Text fontSize={"xl"} fontWeight={"bold"} textAlign={"center"}>
+              Please move your camera{"\n"}over the QR Code
             </Text>
           </Box>
 
           <BarCodeScanner
             style={{
-              width: "60%",
+              width: "80%",
               height: "60%",
             }}
             onBarCodeScanned={handleBarCodeScanned}
@@ -153,10 +151,16 @@ function QRScreen() {
           <Button
             borderRadius={10}
             position={"absolute"}
-            bg={"lightBlue.400"}
+            bg={"white"}
+            borderWidth={1.5}
+            borderColor={"#31409b"}
             onPress={() => setScanned(false)}
+            size={"sm"}
           >
-            Scan Again
+            <HStack alignItems={"center"} space={2}>
+              <AntDesign name="camera" size={24} color="#31409b" />
+              <Text color={"#31409b"}>Click to scan again</Text>
+            </HStack>
           </Button>
         </View>
       </View>

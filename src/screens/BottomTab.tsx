@@ -38,10 +38,10 @@ const PressableIcons: FC<{
                 name={selected === indexNumber ? defaultName : outlineName}
               />
             }
-            color="white"
+            color="#31409b"
             size="lg"
           />
-          <Text mr="2" color="white" fontSize="12">
+          <Text mr="2" color="#31409b" fontSize="12">
             {capitalize(name)}
           </Text>
         </Center>
@@ -57,55 +57,36 @@ const BottomNavigation = memo((props: any) => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (selected === 0 && props.state.index !== 0) {
-      // @ts-ignore
-      navigate("Home");
-      setSelected(0);
-    }
+    // if (selected === 0 && props.state.index !== 0) {
+    //   // @ts-ignore
+    //   navigate("Home");
+    //   setSelected(0);
+    // }
 
     if (selected === 1 && props.state.index !== 1) {
       // @ts-ignore
       navigate("Qr Scanner");
       setSelected(1);
     }
-    // if (selected === 1 && props.state.index !== 1) {
-    //   // @ts-ignore
-    //   navigate("Report");
-    //   setSelected(1);
-    // }
 
-    if (selected === 2 && props.state.index !== 2) {
-      // @ts-ignore
-      navigate("Profile");
-      setSelected(2);
-    }
+    // if (selected === 2 && props.state.index !== 2) {
+    //   // @ts-ignore
+    //   navigate("Profile");
+    //   setSelected(2);
+    // }
   }, [selected, props.state, isFocused]);
 
   return (
     <>
-      <View bg={"white"}>
-        <HStack
-          p={1.5}
-          bg="#0f045d"
-          alignItems="center"
-          borderTopRadius={40}
-          alignSelf={"center"}
-        >
-          <PressableIcons
+      <View>
+        <HStack alignItems="center" alignSelf={"center"}>
+          {/* <PressableIcons
             selected={selected}
             setSelected={setSelected}
             defaultName="home"
             outlineName="home-outline"
             indexNumber={0}
             name="Home"
-          />
-          {/* <PressableIcons
-            selected={selected}
-            setSelected={setSelected}
-            defaultName="document-text"
-            outlineName="document-text-outline"
-            indexNumber={1}
-            name="Report"
           /> */}
           <PressableIcons
             selected={selected}
@@ -116,14 +97,14 @@ const BottomNavigation = memo((props: any) => {
             name="Qr Scanner"
           />
 
-          <PressableIcons
+          {/* <PressableIcons
             selected={selected}
             setSelected={setSelected}
             defaultName="person-circle"
             outlineName="person-circle-outline"
             indexNumber={2}
             name="Profile"
-          />
+          /> */}
         </HStack>
       </View>
     </>
@@ -139,8 +120,8 @@ const BottomTab = () => {
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Qr Scanner" component={QRScanner} />
-      {/* <Tab.Screen name="Report" component={ReportScreen} /> */}
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+
+      {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
     </Tab.Navigator>
   );
 };

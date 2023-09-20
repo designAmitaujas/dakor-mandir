@@ -4,10 +4,10 @@
     "slug": "Dakor-Mandir",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/dakor2.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/logo2.png",
+      "image": "./assets/dakor-4.png",
       "resizeMode": "conatin",
       "backgroundColor": "#ffda67"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
+        "foregroundImage": "./assets/dakor2.png",
         "backgroundColor": "#ffffff"
       }
     },

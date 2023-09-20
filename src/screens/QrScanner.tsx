@@ -1,59 +1,88 @@
-import React, { useState, useEffect } from "react";
-import { Text, View, Button, HStack, VStack } from "native-base";
+import React, { useState, useEffect, useRef } from "react";
+// import { Audio } from "expo-av";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Easing,
+} from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { Box } from "native-base";
-import { StyleSheet } from "react-native";
-import Lottie from "lottie-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { useIsFocused } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
+// const successSound = new Audio.Sound();
 
-const QRScanner = () => {
-  const isFocused = useIsFocused();
+const QRScanner: React.FC = () => {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanned, setScanned] = useState<boolean>(false);
+  const [scannedData, setScannedData] = useState<string | null>(null);
+  const [scannedQRs, setScannedQRs] = useState<string[]>([]);
 
-  if (isFocused === true) return <QRScreen />;
-
-  return <></>;
-};
-
-function QRScreen() {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-  const [info, setInfo] = useState(null);
-  const [info1, setInfo1] = useState(null);
-  const [info2, setInfo2] = useState(null);
+  const scrollLineY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
+
+      // await successSound.loadAsync(require("../../assets/sound.mp3")); // Replace with your sound file
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ data }) => {
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | undefined;
+
+    const animateScrollLine = () => {
+      scrollLineY.setValue(0);
+      animation = Animated.timing(scrollLineY, {
+        toValue: 1,
+        duration: 1500, // Adjust the duration as needed
+        easing: Easing.linear,
+        useNativeDriver: false,
+      });
+
+      if (scanned) {
+        animation.start(() => {
+          if (scanned) {
+            animateScrollLine();
+          }
+        });
+      } else {
+        if (animation) {
+          animation.stop();
+        }
+      }
+    };
+
+    animateScrollLine();
+
+    return () => {
+      if (animation) {
+        animation.stop();
+      }
+    };
+  }, [scanned]);
+
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
 
-    setInfo(data);
-
-    // Handle scanned QR code here
-  };
-
-  const handleScanAgain = () => {
-    console.log("Handle Scan ???");
-    setScanned(false);
-  };
-
-  const renderScanner = () => {
-    if (!scanned) {
-      return <BarCodeScanner onBarCodeScanned={handleBarCodeScanned} />;
+    if (scannedQRs.includes(data)) {
+      // If the same QR code is scanned again, show "Sorry."
+      setScannedData("Sorry");
     } else {
-      return (
-        <View>
-          <Text>QR Code scanned!</Text>
-          <Button onPress={() => console.log("Scannned")}>Scan Again</Button>
-        </View>
-      );
+      // If a new QR code is scanned, mark it as "Success" and store it in the array.
+      setScannedData("Success");
+      setScannedQRs([...scannedQRs, data]);
+
+      // Play the success sound
+      // await successSound.replayAsync();
     }
+  };
+
+  const resetScanner = () => {
+    setScanned(false);
+    setScannedData(null);
   };
 
   if (hasPermission === null) {
@@ -63,109 +92,98 @@ function QRScreen() {
     return <Text>No access to camera</Text>;
   }
 
-  if (!scanned) {
-    return (
-      <>
-        <View
-          flex={1}
-          justifyContent={"center"}
-          alignItems={"center"}
-          bg={"#ffda67"}
-        >
-          <Box alignItems={"center"} justifyContent={"center"}>
-            <Text fontSize={"xl"} fontWeight={"bold"} textAlign={"center"}>
-              Please move your camera{"\n"}over the QR Code
-            </Text>
-          </Box>
-
-          <BarCodeScanner
-            style={{
-              width: "80%",
-              height: "60%",
-            }}
-            onBarCodeScanned={handleBarCodeScanned}
-          />
-        </View>
-      </>
-    );
-  }
-
   return (
-    <>
-      <View bg={"white"} flex={1}>
-        <Box h={"48"} w={"48"} alignSelf={"center"} mt={"32"}>
-          <Lottie
-            source={require("../../assets/91068-message-sent-successfully-plane.json")}
-            autoPlay
-            loop
-          />
-        </Box>
-
-        <VStack
-          bg={"white"}
-          borderRadius={10}
-          shadow={5}
-          mx={5}
-          p={3}
-          space={2}
-          alignItems={"center"}
-          justifyContent={"center"}
-        >
-          <Text fontSize={"2xl"}>Attendance Marked For</Text>
-
-          <HStack mx={5} w={"100%"}>
-            <Text w={"30%"} fontSize={"md"} fontWeight={"semibold"}>
-              Seminar ID
-            </Text>
-            <Text w={"10%"}>:</Text>
-            <Text w={"60%"} fontSize={"md"}>
-              {info}
-            </Text>
-          </HStack>
-          {/* <HStack w={"100%"}>
-            <Text w={"30%"} fontSize={"md"} fontWeight={"semibold"}>
-              Name
-            </Text>
-            <Text w={"10%"}>:</Text>
-            <Text w={"60%"} fontSize={"md"}>
-              Anomynous Shah
-            </Text>
-          </HStack> */}
-          <HStack w={"100%"}>
-            <Text w={"30%"} fontSize={"md"} fontWeight={"semibold"}>
-              Seminar
-            </Text>
-            <Text w={"10%"}>:</Text>
-            <Text w={"60%"} fontSize={"md"}>
-              Tech Edge Series (Virtual)
-            </Text>
-          </HStack>
-        </VStack>
-        <View
-          position={"relative"}
-          justifyContent={"flex-end"}
-          alignItems={"center"}
-          mb={50}
-          flex={1}
-        >
-          <Button
-            borderRadius={10}
-            position={"absolute"}
-            bg={"white"}
-            borderWidth={1.5}
-            borderColor={"#31409b"}
-            onPress={() => setScanned(false)}
-            size={"sm"}
-          >
-            <HStack alignItems={"center"} space={2}>
-              <AntDesign name="camera" size={24} color="#31409b" />
-              <Text color={"#31409b"}>Click to scan again</Text>
-            </HStack>
-          </Button>
-        </View>
+    <View style={styles.container}>
+      {/* Display a custom view behind the scanner */}
+      <View style={styles.scannerContainer}>
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          style={styles.scanner}
+        />
+        {/* Add a scrolling line animation */}
+        <Animated.View
+          style={[
+            styles.scrollLine,
+            {
+              transform: [
+                {
+                  translateY: scrollLineY.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 300], // Scroll from top (0) to bottom (300)
+                  }),
+                },
+              ],
+            },
+          ]}
+        />
       </View>
-    </>
+
+      {scanned && (
+        <View style={styles.feedbackContainer}>
+          <Text style={styles.feedbackText}>{scannedData}</Text>
+          <Text style={styles.feedbackText}>
+            QR Codes Scanned: {scannedQRs.length}
+          </Text>
+          <TouchableOpacity
+            style={styles.scanAgainButton}
+            onPress={resetScanner}
+          >
+            <Text style={styles.scanAgainText}>Scan Again</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scannerContainer: {
+    width: "80%",
+    aspectRatio: 1,
+    overflow: "hidden",
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#000",
+  },
+  scanner: {
+    width: "100%",
+    height: "100%",
+  },
+  feedbackContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingVertical: 20,
+  },
+  feedbackText: {
+    fontSize: 20,
+    color: "white",
+    marginBottom: 10,
+  },
+  scanAgainButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  scanAgainText: {
+    fontSize: 16,
+    color: "white",
+  },
+  scrollLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: "#FF0000", // Customize the scroll line color
+  },
+});
 
 export default QRScanner;

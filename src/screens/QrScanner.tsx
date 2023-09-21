@@ -188,7 +188,7 @@
 
 // export default QRScanner;
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -201,7 +201,7 @@ import {
 } from "native-base";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { Box } from "native-base";
-import { Animated, StyleSheet } from "react-native";
+import { Animated, Easing, StyleSheet } from "react-native";
 import Lottie from "lottie-react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
@@ -232,6 +232,51 @@ function QRScreen() {
     })();
   }, []);
 
+  const scrollLineY = useRef(new Animated.Value(0)).current;
+
+  //   useEffect(() => {
+  //     (async () => {
+  //       const { status } = await BarCodeScanner.requestPermissionsAsync();
+  //       setHasPermission(status === "granted");
+
+  //       // await successSound.loadAsync(require("../../assets/sound.mp3")); // Replace with your sound file
+  //     })();
+  //   }, []);
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | undefined;
+
+    const animateScrollLine = () => {
+      scrollLineY.setValue(0);
+      animation = Animated.timing(scrollLineY, {
+        toValue: 1,
+        duration: 2000, // Adjust the duration as needed
+        easing: Easing.linear,
+        useNativeDriver: false,
+      });
+
+      if (scanned) {
+        animation.start(() => {
+          if (scanned) {
+            animateScrollLine();
+          }
+        });
+      } else {
+        if (animation) {
+          animation.stop();
+        }
+      }
+    };
+
+    animateScrollLine();
+
+    return () => {
+      if (animation) {
+        animation.stop();
+      }
+    };
+  }, [scanned]);
+
   // const handleBarCodeScanned = ({ data }) => {
   //   setScanned(true);
 
@@ -245,10 +290,10 @@ function QRScreen() {
 
     if (scannedQRs.includes(data)) {
       // If the same QR code is scanned again, show "Sorry."
-      setScannedData("Already Received...");
+      setScannedData("Already Received Prasad...");
     } else {
       // If a new QR code is scanned, mark it as "Success" and store it in the array.
-      setScannedData("Success...");
+      setScannedData("Pending Prasad...");
       setScannedQRs([...scannedQRs, data]);
 
       // Play the success sound
@@ -359,6 +404,21 @@ function QRScreen() {
               onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
               style={{ width: "100%", height: "100%" }}
             />
+            <Animated.View
+              style={[
+                styles.scrollLine,
+                {
+                  transform: [
+                    {
+                      translateY: scrollLineY.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 300], // Scroll from top (0) to bottom (300)
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
           </View>
         </View>
       </>
@@ -461,7 +521,12 @@ function QRScreen() {
                   </HStack>
                 </VStack>
 
-                <Text mt={20} fontWeight={"bold"} fontSize={"4xl"}>
+                <Text
+                  mt={20}
+                  fontWeight={"bold"}
+                  fontSize={"4xl"}
+                  textAlign={"center"}
+                >
                   {scannedData}
                 </Text>
 

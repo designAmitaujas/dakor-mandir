@@ -63,16 +63,32 @@ const ForgotPassword = () => {
             return (
               <>
                 <ScrollView bg={"white"} h={"full"}>
-                  <Image
-                    alignSelf={"center"}
-                    mt={16}
-                    h={20}
-                    w={80}
-                    resizeMode="contain"
-                    alt="Image not found"
-                    source={require("../../../assets/logo2.png")}
-                  />
-                  <Text
+                  <VStack
+                    bg={"#ffda67"}
+                    h={"72"}
+                    borderBottomLeftRadius={80}
+                    borderBottomRightRadius={80}
+                    // borderBottomRadius={"full"}
+                  >
+                    <Image
+                      alignSelf={"center"}
+                      mt={12}
+                      h={32}
+                      w={80}
+                      resizeMode="contain"
+                      alt="Image not found"
+                      source={require("../../../assets/dakor2.png")}
+                    />
+                    <Image
+                      alignSelf={"center"}
+                      h={20}
+                      w={80}
+                      resizeMode="contain"
+                      alt="Image not found"
+                      source={require("../../../assets/dakor-3.png")}
+                    />
+                  </VStack>
+                  {/* <Text
                     fontSize={"2xl"}
                     fontWeight={"bold"}
                     mt={2}
@@ -88,9 +104,9 @@ const ForgotPassword = () => {
                     fontWeight={"semibold"}
                   >
                     ડાકોર ટેમ્પલ કમિટી
-                  </Text>
+                  </Text> */}
                   <Text
-                    mt={16}
+                    mt={8}
                     fontSize={"40"}
                     fontWeight={"semibold"}
                     alignSelf={"center"}

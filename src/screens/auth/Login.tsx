@@ -1,48 +1,128 @@
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
 import {
-  Box,
-  HStack,
   Icon,
   IconButton,
   Image,
   Link,
   ScrollView,
-  Spinner,
   Text,
   VStack,
   View,
+  useToast,
 } from "native-base";
 
-import React, { useState } from "react";
-import * as Yup from "yup";
-import BottomTab from "../BottomTab";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import { CustomButton, CustomInput } from "../../components/CustomForm";
-import Home from "../Home";
+import React, { useEffect, useState } from "react";
+import { useFetch } from "use-http";
+import * as Yup from "yup";
+import {
+  CustomAlert,
+  CustomButton,
+  CustomInput,
+} from "../../components/CustomForm";
+import { useAppState } from "../../store/store";
+import axios from "axios";
 
-const initialValue = {
-  email: "dakortemple@gmail.com",
-  password: "123456789",
+interface IInitialValues {
+  username: string;
+  password: string;
+}
+
+const initialValue: IInitialValues = {
+  username: "",
+  password: "",
 };
 
 const validationSchema = Yup.object().shape({
-  email: Yup.string().email().required(),
-  password: Yup.string().min(6).max(18).required(),
+  username: Yup.string().required(),
+  password: Yup.string().required(),
 });
+
+export interface Root {
+  success: boolean;
+  msg: string;
+  data: Data;
+}
+export interface Data {
+  EmployeeId: number;
+  FirstName: string;
+  LastName: string;
+  EmployeeCode: string;
+  UploadImage: string;
+  username: string;
+  Mobile: string;
+  DesignationId: number;
+  Department: string;
+  ReminderHead: string;
+  AllowChatting: any;
+  AllowPasswordModule: any;
+  PasswordManager: any;
+  IsAdmin: boolean;
+}
 
 const Login = () => {
   const { navigate } = useNavigation();
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+  const { setAuthTrue } = useAppState();
+  const { post, response } = useFetch<Root>("/Master/Login");
+  const myToast = useToast();
 
-  const handleSubmit = () => {
-    // @ts-ignore
-    navigate(Home);
-  };
-  const handleLogin = () => {
-    // @ts-ignore
-    navigate(Home);
+  useEffect(() => {
+    if (response.data) {
+      console.log("REsponse ", response.data);
+    }
+  }, [response]);
+
+  const handleSubmit = async (values: IInitialValues) => {
+    try {
+      await post({
+        username: values.username,
+        password: values.password,
+      })
+        .then((res) => {
+          console.log(res.data);
+          if (res.success) {
+            myToast.show({
+              title: res.msg,
+              placement: "top",
+              render: () => (
+                <CustomAlert
+                  colorScheme="success"
+                  status="success"
+                  resMsg={res.msg}
+                />
+              ),
+            });
+
+            setAuthTrue({
+              username: res.data.username,
+
+              isAdmin: res.data.IsAdmin,
+              isAuth: true,
+            });
+            //@ts-ignore
+            navigate("Home");
+          } else {
+            myToast.show({
+              title: res.msg,
+              placement: "top",
+              render: () => (
+                <CustomAlert
+                  colorScheme="info"
+                  status="info"
+                  resMsg={res.msg}
+                />
+              ),
+            });
+          }
+        })
+
+        .catch((err) => console.log(err));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const Forgot = () => {
@@ -134,15 +214,14 @@ const Login = () => {
                     <CustomInput
                       w={"72"}
                       borderColor={"#000"}
-                      name="email"
+                      name="username"
                       label="Email Address"
-                      currentValue={values.email}
-                      errMsg={errors.email}
+                      currentValue={values.username}
+                      errMsg={errors.username}
                       placeholder="Your Email Address"
                       setFieldValue={setFieldValue}
-                      color={"#000"}
                       isRequired={true}
-                      isInvalid={!!touched.email && !!errors.email}
+                      isInvalid={!!touched.username && !!errors.username}
                       leftElement={
                         <Icon
                           as={FontAwesome5}
@@ -188,7 +267,7 @@ const Login = () => {
                                 as={Ionicons}
                                 name="eye"
                                 size={5}
-                                color="#000"
+                                color="#1A237E"
                               />
                             ) : (
                               <Icon
@@ -207,49 +286,26 @@ const Login = () => {
                       alignSelf={"flex-end"}
                       onPress={Forgot}
                       _text={{
+                        color: "#313031",
                         fontWeight: "medium",
-                        fontSize: "md",
+                        fontSize: "sm",
                         textDecoration: "none",
                       }}
                     >
                       Forgot Password ?
                     </Link>
 
-                    {/* <Button
-                        mt="6"
-                        borderRadius={25}
-                        w={"48"}
-                        h={12}
-                        alignSelf={"center"}
-                        bgColor={"#313031"}
-                        shadow={"2"}
-                        //@ts-ignore
-                        onPress={handleSubmit}
-                        leftIcon={isSubmitting === true ? <Spinner /> : null}
-                        isSubmitting={isSubmitting}
-                      >
-                        Log In
-                      </Button> */}
-
                     <CustomButton
                       name="Login"
-                      mt="5"
-                      mb={5}
+                      mt="8"
+                      mb={8}
                       borderRadius={25}
-                      w={"48"}
+                      w={48}
                       h={12}
-                      onPress={handleLogin}
                       alignSelf={"center"}
                       bg={"#ffda67"}
-                      shadow={3}
                       leftIcon={
-                        <Icon
-                          as={FontAwesome5}
-                          name="lock"
-                          mr="1"
-                          size="sm"
-                          color={"black"}
-                        />
+                        <Icon as={FontAwesome5} name="lock" mr="1" size="sm" />
                       }
                       isSubmitting={isSubmitting}
                       onSubmit={handleSubmit}

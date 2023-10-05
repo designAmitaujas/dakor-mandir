@@ -44,15 +44,6 @@ function QRScreen() {
 
   const scrollLineY = useRef(new Animated.Value(0)).current;
 
-  //   useEffect(() => {
-  //     (async () => {
-  //       const { status } = await BarCodeScanner.requestPermissionsAsync();
-  //       setHasPermission(status === "granted");
-
-  //       // await successSound.loadAsync(require("../../assets/sound.mp3")); // Replace with your sound file
-  //     })();
-  //   }, []);
-
   useEffect(() => {
     let animation: Animated.CompositeAnimation | undefined;
 
@@ -94,20 +85,47 @@ function QRScreen() {
 
   //   // Handle scanned QR code here
   // };
-
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
 
-    if (scannedQRs.includes(data)) {
-      // If the same QR code is scanned again, show "Sorry."
-      setScannedData("Already Received Prasad...");
-    } else {
-      // If a new QR code is scanned, mark it as "Success" and store it in the array.
-      setScannedData("Pending Prasad...");
-      setScannedQRs([...scannedQRs, data]);
+    // Make an API request to check if the ID is present in the database
+    try {
+      const response = await fetch(
+        `https://welfare-legends-biz-tablets.trycloudflare.com/api/Master/GetReceipt`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            TransactionId: data,
+          }),
+        }
+      );
 
-      // Play the success sound
-      // await successSound.replayAsync();
+      if (response.ok) {
+        const transactionData = await response.json();
+        if (transactionData.success) {
+          // Transaction ID is present in the database, show success message
+          setScannedData("Transaction Successful");
+
+          // Update the Prasad field in info if it's false
+          if (info?.Prasad === false) {
+            const updatedInfo = { ...info, Prasad: true };
+            setInfo(updatedInfo);
+          }
+          setInfo(transactionData.data); // Store transaction data in 'info' state
+        } else {
+          // Transaction ID is not present in the database, show "Sorry"
+          setScannedData("Sorry, Transaction Not Found");
+        }
+      } else {
+        // Handle API request error
+        setScannedData("Transaction Failed: API Error");
+      }
+    } catch (error) {
+      console.error("API request error:", error);
+      setScannedData("Transaction Failed: API Error");
     }
   };
 
@@ -144,26 +162,6 @@ function QRScreen() {
   if (!scanned) {
     return (
       <>
-        {/* <View
-          flex={1}
-          justifyContent={"center"}
-          alignItems={"center"}
-          bg={"#ffda67"}
-        >
-          <Box alignItems={"center"} justifyContent={"center"}>
-            <Text fontSize={"xl"} fontWeight={"bold"} textAlign={"center"}>
-              Please move your camera{"\n"}over the QR Code
-            </Text>
-          </Box>
-
-          <BarCodeScanner
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-            onBarCodeScanned={handleBarCodeScanned}
-          />
-        </View> */}
         <View flex={1} alignItems={"center"}>
           <HStack
             alignSelf={"flex-start"}
@@ -267,15 +265,9 @@ function QRScreen() {
               User Receipt
             </Text>
           </HStack>
+
           {scanned && (
             <>
-              {/* <Box h={"48"} w={"48"} alignSelf={"center"}>
-                <Lottie
-                  source={require("../../assets/91068-message-sent-successfully-plane.json")}
-                  autoPlay
-                  loop
-                />
-              </Box> */}
               <Image
                 mt={16}
                 h={20}
@@ -311,22 +303,42 @@ function QRScreen() {
                       29/08/2023
                     </Text>
                   </HStack>
+                  {/* Display Name, Mobile, and Amount properties */}
                   <HStack mx={3} w={"100%"}>
                     <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
                       Name
                     </Text>
                     <Text w={"10%"}>:</Text>
                     <Text w={"65%"} fontSize={"lg"}>
-                      {info}Jash Vadgama
+                      {info?.Name}
                     </Text>
                   </HStack>
                   <HStack mx={3} w={"100%"}>
                     <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Rs.
+                      Mobile
                     </Text>
                     <Text w={"10%"}>:</Text>
                     <Text w={"65%"} fontSize={"lg"}>
-                      2000
+                      {info?.Mobile}
+                    </Text>
+                  </HStack>
+                  <HStack mx={3} w={"100%"}>
+                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
+                      Amount
+                    </Text>
+                    <Text w={"10%"}>:</Text>
+                    <Text w={"65%"} fontSize={"lg"}>
+                      {info?.Amount}
+                    </Text>
+                  </HStack>
+
+                  <HStack mx={3} w={"100%"}>
+                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
+                      Prasad Status
+                    </Text>
+                    <Text w={"10%"}>:</Text>
+                    <Text w={"65%"} fontSize={"lg"}>
+                      {JSON.stringify(info?.Prasad)}
                     </Text>
                   </HStack>
                 </VStack>

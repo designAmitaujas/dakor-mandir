@@ -135,7 +135,7 @@ const AppProvider = ({ children }) => {
         <NativeBaseProvider theme={theme}>
           <NavigationContainer onReady={onLayoutRootView}>
             <HttpProvider
-              url="https://silent-wind-recover-cape.trycloudflare.com/api"
+              url="http://dakor.amitaujas.com/webapi/api"
               options={httpProviderConfig}
             >
               {isConnected ? children : <NoInternet />}

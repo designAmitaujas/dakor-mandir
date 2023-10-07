@@ -18,7 +18,7 @@ import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useFetch } from "use-http";
 import { Vibration } from "react-native";
-
+import LottieView from "lottie-react-native";
 interface GetReceiptRoot {
   success: boolean;
   msg: string;
@@ -367,6 +367,11 @@ function QRScanner() {
                 {isLoading ? (
                   <ActivityIndicator size="large" color="#000" />
                 ) : (
+                  // <LottieView
+                  //   source={require("../../assets/animation_lnfokdwk.json")}
+                  //   autoPlay
+                  //   loop
+                  // />
                   <VStack
                     space={3}
                     bg={"#fff"}

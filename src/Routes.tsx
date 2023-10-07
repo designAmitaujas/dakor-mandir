@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import Home from "./screens/Home";
 import QRScanner from "./screens/QrScanner";
 import ForgotPassword from "./screens/auth/ForgotPassword";
+import ChangePassword from "./screens/auth/ChangePassword";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +21,7 @@ const Routes = () => {
       {/* <Stack.Screen name="BottomTab" component={BottomTab} /> */}
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="QrScanner" component={QRScanner} />
+      <Stack.Screen name="ChangePassword" component={ChangePassword} />
     </Stack.Navigator>
   );
 };

@@ -25,15 +25,17 @@ import {
 import { TouchableOpacity } from "react-native-gesture-handler";
 const logo = require("../../assets/logo.png");
 import moment from "moment";
-
+import { useAppState } from "../store/store";
 import * as Calendar from "expo-calendar";
 import { Platform, TextInput, ToastAndroid } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import QRScanner from "./QrScanner";
+import ChangePassword from "./auth/ChangePassword";
 
 const Home = () => {
   const { navigate } = useNavigation();
+  const { setAuthFalse, userInfo } = useAppState();
 
   const networking = () => {
     // @ts-ignore
@@ -42,7 +44,14 @@ const Home = () => {
   const logout = () => {
     // @ts-ignore
     navigate("Login");
+    // setAuthFalse();
   };
+
+  const ChangePassword = () => {
+    // @ts-ignore
+    navigate("ChangePassword");
+  };
+
   const scan = () => {
     // @ts-ignore
     navigate("QrScanner");
@@ -60,6 +69,10 @@ const Home = () => {
           <Image source={logo} alt="logo" resizeMode="contain" h={12} w={48} />
           <TouchableOpacity onPress={logout}>
             <Ionicons name="power" size={28} />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={ChangePassword}>
+            <Ionicons name="md-person-circle" size={28} />
           </TouchableOpacity>
         </HStack>
       </Box>

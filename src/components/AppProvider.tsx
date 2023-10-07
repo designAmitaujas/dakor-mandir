@@ -135,7 +135,7 @@ const AppProvider = ({ children }) => {
         <NativeBaseProvider theme={theme}>
           <NavigationContainer onReady={onLayoutRootView}>
             <HttpProvider
-              url="https://welfare-legends-biz-tablets.trycloudflare.com/api"
+              url="https://silent-wind-recover-cape.trycloudflare.com/api"
               options={httpProviderConfig}
             >
               {isConnected ? children : <NoInternet />}

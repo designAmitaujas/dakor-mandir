@@ -8,24 +8,71 @@ import {
   Icon,
   Image,
   ScrollView,
+  Box,
 } from "native-base";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { Box } from "native-base";
+import { ActivityIndicator } from "react-native";
 import { Animated, Easing, StyleSheet } from "react-native";
-import Lottie from "lottie-react-native";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useFetch } from "use-http";
+import { Vibration } from "react-native";
 
-const QRScanner = () => {
-  const isFocused = useIsFocused();
+interface GetReceiptRoot {
+  success: boolean;
+  msg: string;
+  data: GetReceiptData;
+}
 
-  if (isFocused === true) return <QRScreen />;
+interface GetReceiptData {
+  bhogsevaId: number;
+  TransactionId: string;
+  Name: string;
+  Mobile: string;
+  Amount: string;
+  Bhogname: string;
+  Date: string;
+  Prasad: boolean;
+}
 
-  return <></>;
-};
+interface GetMandirTrustRoot {
+  success: boolean;
+  msg: string;
+  data: GetMandirTrustData;
+}
+
+interface GetMandirTrustData {
+  MandirId: number;
+  Transactionid: string;
+  Name: string;
+  Mobileno: string;
+  Amount: string;
+  MandirTrust: string;
+  Prasad: boolean;
+}
+
+interface AlreadyReceivedRoot {
+  success: boolean;
+  msg: string;
+  data: string;
+}
+
+interface MandirTrustRoot {
+  success: boolean;
+  msg: string;
+  data: string;
+}
 
 function QRScreen() {
+  const isFocused = useIsFocused();
+
+  if (isFocused === true) return <QRScanner />;
+
+  return <></>;
+}
+
+function QRScanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [info, setInfo] = useState(null);
@@ -34,6 +81,17 @@ function QRScreen() {
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [scannedQRs, setScannedQRs] = useState<string[]>([]);
   const { goBack } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [receiptData, setReceiptData] = useState<GetReceiptData | null>(null);
+
+  const { post: getReceipt, response: getReceiptResponse } =
+    useFetch<GetReceiptRoot>();
+  const { post: alreadyReceived, response: alreadyReceivedResponse } =
+    useFetch<AlreadyReceivedRoot>();
+  const { post: getMandirTrust, response: getMandirTrustResponse } =
+    useFetch<GetMandirTrustRoot>();
+  const { post: mandirTrustReceived, response: MandirTrustReceivedResponse } =
+    useFetch<MandirTrustRoot>();
 
   useEffect(() => {
     (async () => {
@@ -78,54 +136,85 @@ function QRScreen() {
     };
   }, [scanned]);
 
-  // const handleBarCodeScanned = ({ data }) => {
-  //   setScanned(true);
-
-  //   setInfo(data);
-
-  //   // Handle scanned QR code here
-  // };
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
-
-    // Make an API request to check if the ID is present in the database
+    setIsLoading(true); // Set loading state when data is being fetched
     try {
-      const response = await fetch(
-        `https://welfare-legends-biz-tablets.trycloudflare.com/api/Master/GetReceipt`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            TransactionId: data,
-          }),
-        }
-      );
+      let firstApiSuccess = false;
+      let secondApiSuccess = false;
 
-      if (response.ok) {
-        const transactionData = await response.json();
-        if (transactionData.success) {
-          // Transaction ID is present in the database, show success message
-          setScannedData("Transaction Successful");
-
-          // Update the Prasad field in info if it's false
-          if (info?.Prasad === false) {
-            const updatedInfo = { ...info, Prasad: true };
-            setInfo(updatedInfo);
+      // First Get Receipt
+      await getReceipt("/Master/GetReceipt", {
+        TransactionId: data,
+      }).then(async (res: GetReceiptRoot) => {
+        if (res.success) {
+          firstApiSuccess = true;
+          //True
+          if (res.data.Prasad) {
+            setScannedData("Already Scanned , Not Eligible for Prasad");
+            await Vibration.vibrate(); // Vibrate the device
+            console.log("Already Scanned");
           }
-          setInfo(transactionData.data); // Store transaction data in 'info' state
-        } else {
-          // Transaction ID is not present in the database, show "Sorry"
-          setScannedData("Sorry, Transaction Not Found");
+          //False
+          else {
+            await alreadyReceived(
+              `/Master/AlreadyReceived/${res.data.bhogsevaId}`
+            )
+              .then((newRes: AlreadyReceivedRoot) => {
+                if (newRes.success) {
+                  setScannedData("Eligible For Prasad");
+                  console.log("Done");
+                } else {
+                  console.log(newRes.msg);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
         }
-      } else {
-        // Handle API request error
-        setScannedData("Transaction Failed: API Error");
+      });
+
+      // Second API Call
+      await getMandirTrust("/Master/GetMandirTrust", {
+        TransactionId: data,
+      }).then(async (res: GetMandirTrustRoot) => {
+        if (res.success) {
+          secondApiSuccess = true;
+          //True
+          if (res.data.Prasad) {
+            setScannedData("Already Scanned , Not Eligible for Prasad");
+            await Vibration.vibrate(); // Vibrate the device
+            console.log("Already Scanned");
+          }
+          //False
+          else {
+            await mandirTrustReceived(
+              `/Master/MandirTrustReceived/${res.data.MandirId}`
+            )
+              .then((newRes: MandirTrustRoot) => {
+                if (newRes.success) {
+                  setScannedData("Eligible For Prasad");
+                  console.log("Done");
+                } else {
+                  console.log(newRes.msg);
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        }
+      });
+
+      // If neither of the API calls succeeded, print "Id Not Found"
+      if (!firstApiSuccess && !secondApiSuccess) {
+        setScannedData("QR CODE DOES NOT MATCH");
       }
-    } catch (error) {
-      console.error("API request error:", error);
-      setScannedData("Transaction Failed: API Error");
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setIsLoading(false); // Turn off loading state after data fetching is complete
     }
   };
 
@@ -146,7 +235,7 @@ function QRScreen() {
       return (
         <View>
           <Text>QR Code scanned!</Text>
-          <Button onPress={() => console.log("Scannned")}>Scan Again</Button>
+          <Button onPress={() => console.log("Scanned")}>Scan Again</Button>
         </View>
       );
     }
@@ -236,47 +325,37 @@ function QRScreen() {
   return (
     <>
       <View bg={"white"} flex={1}>
-        <ScrollView>
-          <HStack
-            alignSelf={"flex-start"}
-            alignItems={"center"}
-            bg={"#ffda67"}
-            w={"full"}
-            p={2}
+        <HStack
+          alignSelf={"flex-start"}
+          alignItems={"center"}
+          bg={"#ffda67"}
+          w={"full"}
+          p={2}
+        >
+          <Button
+            bg="transparent"
+            colorScheme={"white"}
+            onPress={goBack}
+            leftIcon={
+              <Icon
+                size="md"
+                as={<FontAwesome5 name="arrow-left" />}
+                color="black"
+              />
+            }
+          />
+          <Text
+            fontSize={"xl"}
+            fontWeight={"bold"}
+            textAlign={"center"}
+            ml={20}
           >
-            <Button
-              bg="transparent"
-              colorScheme={"white"}
-              onPress={goBack}
-              leftIcon={
-                <Icon
-                  size="md"
-                  as={<FontAwesome5 name="arrow-left" />}
-                  color="black"
-                />
-              }
-            />
-            <Text
-              fontSize={"xl"}
-              fontWeight={"bold"}
-              textAlign={"center"}
-              ml={20}
-            >
-              User Receipt
-            </Text>
-          </HStack>
-
+            User Receipt
+          </Text>
+        </HStack>
+        <ScrollView>
           {scanned && (
             <>
-              <Image
-                mt={16}
-                h={20}
-                alignSelf={"center"}
-                resizeMode="contain"
-                alt="Image not found"
-                source={require("../../assets/dakor-3.png")}
-              />
-
               <VStack
                 mt={5}
                 bg={"#fff"}
@@ -285,68 +364,69 @@ function QRScreen() {
                 alignItems={"center"}
                 justifyContent={"center"}
               >
-                <VStack
-                  space={3}
-                  bg={"#fff"}
-                  borderRadius={10}
-                  borderWidth={2}
-                  borderColor={"#ffda67"}
-                  shadow={5}
-                  p={3}
-                >
-                  <HStack mx={3} w={"100%"}>
-                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Date
-                    </Text>
-                    <Text w={"10%"}>:</Text>
-                    <Text w={"65%"} fontSize={"lg"}>
-                      29/08/2023
-                    </Text>
-                  </HStack>
-                  {/* Display Name, Mobile, and Amount properties */}
-                  <HStack mx={3} w={"100%"}>
-                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Name
-                    </Text>
-                    <Text w={"10%"}>:</Text>
-                    <Text w={"65%"} fontSize={"lg"}>
-                      {info?.Name}
-                    </Text>
-                  </HStack>
-                  <HStack mx={3} w={"100%"}>
-                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Mobile
-                    </Text>
-                    <Text w={"10%"}>:</Text>
-                    <Text w={"65%"} fontSize={"lg"}>
-                      {info?.Mobile}
-                    </Text>
-                  </HStack>
-                  <HStack mx={3} w={"100%"}>
-                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Amount
-                    </Text>
-                    <Text w={"10%"}>:</Text>
-                    <Text w={"65%"} fontSize={"lg"}>
-                      {info?.Amount}
-                    </Text>
-                  </HStack>
+                {isLoading ? (
+                  <ActivityIndicator size="large" color="#000" />
+                ) : (
+                  <VStack
+                    space={3}
+                    bg={"#fff"}
+                    borderRadius={10}
+                    borderWidth={2}
+                    borderColor={"#ffda67"}
+                    shadow={5}
+                    p={3}
+                  >
+                    <HStack mx={3} w={"100%"}>
+                      <Text w={"25%"} fontSize={"md"} fontWeight={"semibold"}>
+                        Date
+                      </Text>
+                      <Text w={"10%"}>:</Text>
+                      <Text w={"65%"} fontSize={"md"}>
+                        {getReceiptResponse.data?.data?.Date || "-"}
+                      </Text>
+                    </HStack>
+                    {/* Display Name, Mobile, and Amount properties */}
+                    <HStack mx={3} w={"100%"}>
+                      <Text w={"25%"} fontSize={"md"} fontWeight={"semibold"}>
+                        Name
+                      </Text>
+                      <Text w={"10%"}>:</Text>
+                      <Text w={"65%"} fontSize={"md"}>
+                        {getReceiptResponse.data?.data?.Name ||
+                          getMandirTrustResponse.data?.data?.Name ||
+                          "Name not available"}
+                      </Text>
+                    </HStack>
 
-                  <HStack mx={3} w={"100%"}>
-                    <Text w={"25%"} fontSize={"lg"} fontWeight={"semibold"}>
-                      Prasad Status
-                    </Text>
-                    <Text w={"10%"}>:</Text>
-                    <Text w={"65%"} fontSize={"lg"}>
-                      {JSON.stringify(info?.Prasad)}
-                    </Text>
-                  </HStack>
-                </VStack>
+                    <HStack mx={3} w={"100%"}>
+                      <Text w={"25%"} fontSize={"md"} fontWeight={"semibold"}>
+                        Mobile
+                      </Text>
+                      <Text w={"10%"}>:</Text>
+                      <Text w={"65%"} fontSize={"md"}>
+                        {getReceiptResponse.data?.data?.Mobile ||
+                          getMandirTrustResponse.data?.data?.Mobileno ||
+                          "-"}
+                      </Text>
+                    </HStack>
+                    <HStack mx={3} w={"100%"}>
+                      <Text w={"25%"} fontSize={"md"} fontWeight={"semibold"}>
+                        Amount
+                      </Text>
+                      <Text w={"10%"}>:</Text>
+                      <Text w={"65%"} fontSize={"md"}>
+                        {getReceiptResponse.data?.data?.Amount ||
+                          getMandirTrustResponse.data?.data?.Amount ||
+                          "-"}
+                      </Text>
+                    </HStack>
+                  </VStack>
+                )}
 
                 <Text
-                  mt={20}
+                  mt={16}
                   fontWeight={"bold"}
-                  fontSize={"4xl"}
+                  fontSize={"2xl"}
                   textAlign={"center"}
                 >
                   {scannedData}

@@ -52,7 +52,7 @@ const ChangePassword = () => {
   const handleSubmit = async (values: Root) => {
     try {
       const apiUrl =
-        "https://cemetery-usc-characterized-aside.trycloudflare.com//api/Master/Changepassword";
+        "http://dakor.amitaujas.com/webapi/api/Master/Changepassword";
 
       const response = await axios.post(apiUrl, values);
 
@@ -99,8 +99,40 @@ const ChangePassword = () => {
           response.data && response.data.msg
             ? response.data.msg
             : "Password change failed";
-        console.error("Password change failed:", error);
+        // console.error("Password change failed:", error);
         // Set the error message state
+
+        Toast.show({
+          render: ({ onClose }) => (
+            <Box
+              bg="emerald.500"
+              px="2"
+              py="1"
+              rounded="sm"
+              my={5}
+              mx={3}
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="row"
+            >
+              <Text color="white" fontSize="md" fontWeight="semibold">
+                Old Password Is Incorrect{" "}
+              </Text>
+              <IconButton
+                ml={2}
+                onPress={onClose}
+                icon={
+                  <Icon as={FontAwesome5} name="times" color="white" size={4} />
+                }
+                size="sm"
+                variant="unstyled"
+                _focus={{ outlineColor: "none" }}
+              />
+            </Box>
+          ),
+          duration: 3000, // Toast will be shown for 3 seconds
+          placement: "top", // You can change the placement to 'bottom' or 'center' if needed
+        });
         setErrorMessage(error);
       }
     } catch (err) {
@@ -174,7 +206,7 @@ const ChangePassword = () => {
                     name="OldPassword"
                     label="Old Password"
                     currentValue={values.OldPassword}
-                    errMsg={errorMessage}
+                    errMsg={errors.OldPassword}
                     placeholder="Old Password"
                     setFieldValue={setFieldValue}
                     color={"#000"}

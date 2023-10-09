@@ -42,7 +42,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (values) => {
     try {
       const apiUrl =
-        "https://cemetery-usc-characterized-aside.trycloudflare.com/api/Master/Forgotpassword";
+        "http://dakor.amitaujas.com/webapi/api/Master/Forgotpassword";
 
       const response = await axios.post(apiUrl, {
         Username: values.email,

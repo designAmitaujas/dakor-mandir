@@ -27,7 +27,7 @@ import { IInputProps } from "native-base/lib/typescript/components/primitives/In
 import React, { memo, useEffect, useState } from "react";
 import isEqual from "react-fast-compare";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import useRunAfterInteraction from "../../hooks/useRunAfterInteraction";
+import useRunAfterInteraction from "../hooks/useRunAfterInteraction";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 
 interface ICustomInput extends IInputProps {

@@ -231,7 +231,7 @@ const ChangePassword = () => {
                     name="ChangePassword"
                     label="New Password"
                     currentValue={values.ChangePassword}
-                    errMsg={errorMessage}
+                    errMsg={errors.ChangePassword}
                     placeholder="New Password"
                     setFieldValue={setFieldValue}
                     color={"#000"}
@@ -258,7 +258,7 @@ const ChangePassword = () => {
                     name="ConfirmPassword"
                     label="Confirm New Password"
                     currentValue={values.ConfirmPassword}
-                    errMsg={errorMessage}
+                    errMsg={errors.ConfirmPassword}
                     placeholder="Confirm New Password"
                     setFieldValue={setFieldValue}
                     color={"#000"}

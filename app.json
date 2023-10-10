@@ -11,18 +11,27 @@
       "resizeMode": "conatin",
       "backgroundColor": "#ffda67"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amitaujas.DakorMandir"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/dakor2.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.amitaujas.DakorMandir"
     },
     "web": {
       "favicon": "./assets/logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "172f93dc-2e85-47d8-8045-de373bbde4ae"
+      }
     }
   }
 }
